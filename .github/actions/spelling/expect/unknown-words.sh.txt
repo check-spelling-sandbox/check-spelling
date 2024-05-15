@@ -16,6 +16,7 @@ noreply
 notest
 nproc
 physicalcpu
+pyaml
 rawfile
 sarifs
 spellchecker
