@@ -3,8 +3,6 @@ codeql
 cpanm
 cpanminus
 DEBIAN
-elif
-esac
 excludelist
 fchurn
 githubcli
@@ -18,7 +16,6 @@ noreply
 notest
 nproc
 physicalcpu
-PIPESTATUS
 rawfile
 sarifs
 spellchecker
