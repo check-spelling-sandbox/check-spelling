@@ -2483,7 +2483,7 @@ remove_items() {
     if [ -s "$remove_words" ]; then
       echo "
         <details><summary>These words are not needed and should be removed
-        </summary>$(cat "$remove_words")$N🫥$N</details>
+        </summary>$(cat "$remove_words")$N</details><p></p>
       " | strip_lead_and_blanks
       set_output_variable stale_words "$remove_words"
     else
