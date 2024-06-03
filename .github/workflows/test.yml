@@ -51,13 +51,13 @@ jobs:
               perl -e "use $module; 1;" > /dev/null 2>/dev/null || echo $module
             done | xargs
           )
+          command -v cover >/dev/null 2>/dev/null || APT_PACKAGES=libdevel-cover-perl
           [ -z "$cpan_modules" ] || command -v cpanm >/dev/null 2>/dev/null || curl -s -S -L https://cpanmin.us | perl - --sudo App::cpanminus
           command -v jd && HAS_JD=1 || HAS_JD=
           [ -n "$HAS_JD" ] || command -v go >/dev/null 2>/dev/null || GO_PACKAGE=" golang"
-          APT_PACKAGES="$GO_PACKAGE"
+          APT_PACKAGES="$APT_PACKAGES$GO_PACKAGE"
           [ -z "$APT_PACKAGES" ] ||
           (
-            APT_PACKAGES="$GO_PACKAGE"
             sudo apt-get install -y $APT_PACKAGES ||
             sudo apt-get update &&
             sudo apt-get install -y $APT_PACKAGES
