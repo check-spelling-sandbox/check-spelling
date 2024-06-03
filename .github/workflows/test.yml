@@ -41,11 +41,13 @@ jobs:
     - name: test
       id: test
       shell: bash
+      env:
+        required_perl_modules: ${{ steps.perl-config.outputs.perl-modules }}
       run: |
         (
           PATH=$PATH:~/go/bin
           cpan_modules=$(
-            for module in ${{ steps.perl-config.outputs.perl-modules }}; do
+            for module in $required_perl_modules; do
               perl -e "use $module; 1;" > /dev/null 2>/dev/null || echo $module
             done | xargs
           )
