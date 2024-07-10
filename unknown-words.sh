@@ -3515,7 +3515,7 @@ set_patch_remove_add() {
       else
         headline="There are currently $expect_count expected items."
       fi
-      title="No new words with misspellings found"
+      title="No new misspelled words found"
       spelling_info "$title" "$headline" ""
       end_group
       should_collapse_previous_and_not_comment
