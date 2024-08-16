@@ -15,7 +15,9 @@ jobs:
           - os: ubuntu-latest
             sudo: sudo
             perl-sudo-flag: --sudo
+            curl: curl
           - os: windows-latest
+            curl-executable: curl.exe
       fail-fast: false
     name: Perl
     permissions:
@@ -55,10 +57,12 @@ jobs:
         GH_TOKEN: ${{ github.token }}
         PERL_SUDO_FLAG: ${{ matrix.perl-sudo-flag }}
         SUDO: ${{ matrix.sudo }}
+        CURL: ${{ matrix.curl-executable }}
       run: |
         PATH="$PATH":~/go/bin
         mkdir -p ~/go/bin
         (
+          set -x
           PATH=$PATH:~/go/bin
           if ! command -v cover >/dev/null 2>/dev/null; then
             if command -v apt-get >/dev/null 2>/dev/null; then
