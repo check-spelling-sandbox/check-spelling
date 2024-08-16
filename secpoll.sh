@@ -36,7 +36,13 @@ version_reversed=$(echo "$version"|tr '.' "\n" | tac | tr "\n" '.')
 dns_server_cached=$(dns_server)
 
 lookup() {
-  dig txt +noauthority +answer +noquestion "$1" $dns_server_cached 2>&1 |
+  (
+    if [ -n "$WINDIR" ]; then
+      nslookup -q=txt "$1" $dns_server_cached
+    else
+      dig txt +noauthority +answer +noquestion "$1" $dns_server_cached
+    fi
+  ) 2>&1 |
   perl -e 'while (<>) {
     if (/command not found/) {
       $poll_status = $_;

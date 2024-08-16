@@ -1,3 +1,5 @@
+nslookup
 NXDOMAIN
 secpoll
 tac
+WINDIR
