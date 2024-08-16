@@ -75,6 +75,12 @@ on:
 
 jobs:
   spelling:
+    strategy:
+      matrix:
+        os:
+        - ubuntu-latest
+        - windows-latest
+      fail-fast: false
     name: Check Spelling
     permissions:
       contents: read
@@ -87,10 +93,10 @@ jobs:
       docker_container: ${{ steps.spelling.outputs.docker_container }}
     env:
       workflow_check_commit_messages: commits
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     if: ${{ contains(github.event_name, 'pull_request') || github.event_name == 'push' }}
     concurrency:
-      group: spelling-${{ github.event.pull_request.number || github.ref }}
+      group: spelling-${{ github.event.pull_request.number || github.ref }}-${{ matrix.os }}
       # note: If you use only_check_changed_files, you do not want cancel-in-progress
       cancel-in-progress: true
     steps:
@@ -140,6 +146,7 @@ jobs:
           not-lower-pattern: '[^\p{Ll}\p{Lm}]'
           not-upper-or-lower-pattern: '[^\p{Lu}\p{Lt}\p{Lm}]'
           punctuation-pattern: "'"
+          report_title_suffix: ${{ matrix.os }}
 
   comment-push:
     name: Report (Push)
