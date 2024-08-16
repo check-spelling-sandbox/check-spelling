@@ -1516,6 +1516,9 @@ install_tools() {
     elif command_v brew; then
       echo "$apps" | xargs brew install
       apps=
+    elif command_v choco; then
+      echo "$apps" | xargs choco install
+      apps=
     else
       echo "missing $apps -- things will fail" >&2
     fi
