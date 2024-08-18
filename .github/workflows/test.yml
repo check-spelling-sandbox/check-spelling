@@ -144,11 +144,21 @@ jobs:
       if: success() || failure()
       shell: bash
       run: |
-        perl `command -v cover` -ignore /usr/bin/shasum -report html
-        if [ -e cover_db/coverage.html ]; then
-          (
-            t/html-to-markdown.pl cover_db/coverage.html
-          ) >> "$GITHUB_STEP_SUMMARY"
+        cover=$(command -v cover)
+        if [ -z "$cover" ]; then
+          echo "# Cover binary not available" >> "$GITHUB_STEP_SUMMARY"
+        else
+          shasum=$(which shasum)
+          if [ -n "$shasum" ]; then
+            perl "$cover" -ignore "$shasum" -report html
+          else
+            perl "$cover" -report html
+          fi
+          if [ -e cover_db/coverage.html ]; then
+            (
+              t/html-to-markdown.pl cover_db/coverage.html
+            ) >> "$GITHUB_STEP_SUMMARY"
+          fi
         fi
         echo 'ran=1' >> "$GITHUB_OUTPUT"
     - name: store-coverage
