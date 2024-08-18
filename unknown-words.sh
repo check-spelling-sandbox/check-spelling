@@ -1517,7 +1517,12 @@ install_tools() {
       echo "$apps" | xargs brew install
       apps=
     elif command_v choco; then
-      echo "$apps" | xargs choco install
+      if ! echo "$apps" | xargs choco install; then
+        unset temp
+        unset tmp
+        cat C:\\ProgramData\\chocolatey\\logs\\chocolatey.log
+        echo "$apps" | xargs choco install
+      fi
       apps=
     else
       echo "missing $apps -- things will fail" >&2
