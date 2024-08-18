@@ -1520,6 +1520,10 @@ install_tools() {
       if ! echo "$apps" | xargs choco install; then
         unset temp
         unset tmp
+        curl -O https://download.sysinternals.com/files/Handle.zip
+        unzip Handle.zip
+        powershell -command "Expand-Archive -Force Handle.zip"
+        ./handle.exe
         cat C:\\ProgramData\\chocolatey\\logs\\chocolatey.log
         if ! echo "$apps" | xargs choco install; then
           cat C:\\ProgramData\\chocolatey\\logs\\chocolatey.log
