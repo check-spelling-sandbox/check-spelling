@@ -1521,7 +1521,9 @@ install_tools() {
         unset temp
         unset tmp
         cat C:\\ProgramData\\chocolatey\\logs\\chocolatey.log
-        echo "$apps" | xargs choco install
+        if ! echo "$apps" | xargs choco install; then
+          cat C:\\ProgramData\\chocolatey\\logs\\chocolatey.log
+        fi
       fi
       apps=
     else
