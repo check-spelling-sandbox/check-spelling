@@ -113,7 +113,13 @@ jobs:
             fi
           )
           [ -z "$cpan_modules" ] || command -v cpanm >/dev/null 2>/dev/null || curl -s -S -L https://cpanmin.us | perl - $PERL_SUDO_FLAG App::cpanminus
-          [ -z "$cpan_modules" ] || perl `command -v cpanm` -S --notest $cpan_modules
+          if [ -n "$cpan_modules" ]; then
+            if ! perl `command -v cpanm` -S --notest $cpan_modules; then
+              find $HOME/.cpanm/work
+              find $HOME/.cpanm/work -name build.log |
+                xargs -n1 cat
+            fi
+          fi
           wait
         ) > /tmp/prework || (cat /tmp/prework && false)
         ./Build.PL
