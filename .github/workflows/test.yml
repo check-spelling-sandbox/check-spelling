@@ -150,6 +150,7 @@ jobs:
       if: success() || failure()
       shell: bash
       run: |
+        set -x
         cover=$(command -v cover)
         if [ -z "$cover" ]; then
           echo "# Cover binary not available" >> "$GITHUB_STEP_SUMMARY"
