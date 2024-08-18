@@ -36,9 +36,12 @@ jobs:
     - name: perl configuration
       id: perl-config
       shell: bash
+      env:
+        windows_modules: ${{ runner.os == 'Windows' && 'ExtUtils::Manifest' || ''}}
       run: |
         perl_modules="$(
           echo "
+          $windows_modules
           Module::Build::Tiny
           Devel::Cover
           Devel::Cover::Report::Html
