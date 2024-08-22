@@ -147,6 +147,11 @@ jobs:
           not-upper-or-lower-pattern: '[^\p{Lu}\p{Lt}\p{Lm}]'
           punctuation-pattern: "'"
           report_title_suffix: ${{ matrix.os }}
+      - name: debug tmate session
+        if: failure()
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
 
   comment-push:
     name: Report (Push)
