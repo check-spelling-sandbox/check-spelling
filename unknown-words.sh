@@ -1517,18 +1517,8 @@ install_tools() {
       echo "$apps" | xargs brew install
       apps=
     elif command_v choco; then
-      if ! echo "$apps" | xargs choco install; then
-        unset temp
-        unset tmp
-        curl -O https://download.sysinternals.com/files/Handle.zip
-        unzip Handle.zip
-        powershell -command "Expand-Archive -Force Handle.zip"
-        ./handle.exe
-        cat C:\\ProgramData\\chocolatey\\logs\\chocolatey.log
-        if ! echo "$apps" | xargs choco install; then
-          cat C:\\ProgramData\\chocolatey\\logs\\chocolatey.log
-        fi
-      fi
+      echo "Skipping choco -- it is not cooperating"
+      echo "We want choco to install: $apps"
       apps=
     else
       echo "missing $apps -- things will fail" >&2
