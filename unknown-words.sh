@@ -1531,18 +1531,20 @@ install_tools() {
     if [ -n "$TEMP" ] && [ -n "$temp" ] && [ "$TEMP" != "$temp" ]; then
       TEMP="$temp"
     fi
+    cpanm_command=$(command -v cpanm)
     (
       echo "$perl_libs" |
-      xargs perl "$(command -v cpanm)" --verbose --notest 2>&1
+      xargs perl "$cpanm_command" --verbose --notest 2>&1
     ) |
       tee "$cpanm_log" ||
       true
-    needed_perl_lib_directories=$(
-      for perl_lib_requested in $perl_libs; do
-        perl "-M$perl_lib_requested" -e1 2>/dev/null || echo "$perl_lib_requested" | perl -pe 's/::/-/g;s<$><*/>'
-      done
-    )
-    if [ -n "$needed_perl_lib_directories" ]; then
+
+    needed_perl_libs=$(mktemp)
+    for attempt in $(seq 3); do
+    for perl_lib_requested in $perl_libs; do
+      perl "-M$perl_lib_requested" -e1 2>/dev/null || echo "$perl_lib_requested" >> "$needed_perl_libs"
+    done
+    if [ -s "$needed_perl_libs" ]; then
       cpanm_work=$(perl -ne '
         if (m{^Work directory is (.*)}) {
           print $1;
@@ -1560,19 +1562,36 @@ install_tools() {
           cd "$cpanm_work"
           for cpanm_module in $(
             perl -ne 'next unless m{Building(?: and testing|) (\S+).*failed|Building (\S+) \.\.\. make: \*\*\* No rule to make target .*/Config\.pm|Bailing out the installation for (.*)\.}; print "$1$2$3\n"' "$cpanm_log"
-          ) $needed_perl_lib_directories; do (
-            cd "$cpanm_module"
-            if [ ! -e Makefile ] && [ -e Makefile.PL ]; then
-              perl Makefile.PL
+          ) $needed_perl_libs; do (
+            if echo "$cpanm_module" | grep -q '::'; then
+              cpanm_module_with_star=$(echo "$cpanm_module" | perl -pe 's/::/-/g;s<$><*/>')
+              cpanm_module_expanded=$(eval echo "$cpanm_module_with_star")
+              if [ -d "$cpanm_module_expanded" ]; then
+                cpanm_module="$cpanm_module_expanded"
+              else
+                perl "$cpanm_command" --verbose --notest "$cpanm_module" || true
+              fi
             fi
-            perl -pi -e 's<CONFIGDEP =.*><CONFIGDEP =>' Makefile
-            make &&
-              make install ||
-              echo "Could not build $cpanm_module -- this is probably fatal"
+            if [ -d "$cpanm_module" ]; then
+              cd "$cpanm_module"
+              if [ ! -e Makefile ] && [ -e Makefile.PL ]; then
+                makefile_pl_log=$(mktemp)
+                perl Makefile.PL |
+                  tee "$makefile_pl_log" ||
+                  true
+                perl -ne 'next unless m{you may need to install the (\S+) module}; print' "$makefile_pl_log" >> "$needed_perl_libs"
+              fi
+              perl -pi -e 's<CONFIGDEP =.*><CONFIGDEP =>' Makefile
+              make &&
+                make install ||
+                echo "Could not build $cpanm_module -- this is probably fatal"
+            fi
           ); done
         )
       fi
     fi
+
+    done
   )
     perl_libs=''
   fi
