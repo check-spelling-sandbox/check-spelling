@@ -1,5 +1,6 @@
 apps
 codeql
+CONFIGDEP
 cpanm
 cpanminus
 excludelist
@@ -10,6 +11,7 @@ gsutil
 keyring
 maxdepth
 mindepth
+msys
 nektos
 noreply
 notest

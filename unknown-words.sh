@@ -1535,7 +1535,49 @@ install_tools() {
     fi
   fi
   if [ -n "$perl_libs" ]; then
-    echo "$perl_libs" | xargs perl "$(command -v cpanm)" --notest
+    cpanm_log=$(mktemp)
+    (
+      echo "$perl_libs" |
+      xargs perl "$(command -v cpanm)" --verbose --notest 2>&1
+    ) |
+      tee "$cpanm_log" ||
+      true
+    needed_perl_lib_directories=$(
+      for perl_lib_requested in $perl_libs; do
+        perl "-M$perl_lib_requested" -e1 2>/dev/null || echo "$perl_lib_requested" | perl -pe 's/::/-/g;s<$><*/>'
+      done
+    )
+    if [ -n "$needed_perl_lib_directories" ]; then
+      cpanm_work=$(perl -ne '
+        if (m{^Work directory is (.*)}) {
+          print $1;
+          last;
+        }
+        if (m{^See (.*?)/build.log for details}) {
+          print $1;
+          last;
+        }
+      ' "$cpanm_log" | head -1)
+      if [ ! -d "$cpanm_work" ]; then
+        echo "::error ::Could not recover from cpanm failures -- this is probably fatal"
+      else
+        (
+          cd "$cpanm_work"
+          for cpanm_module in $(
+            perl -ne 'next unless m{Building(?: and testing|) (\S+).*failed|Building (\S+) \.\.\. make: \*\*\* No rule to make target .*/Config\.pm|Bailing out the installation for (.*)\.}; print "$1$2$3\n"' "$cpanm_log"
+          ) $needed_perl_lib_directories; do (
+            cd "$cpanm_module"
+            if [ ! -e Makefile ] && [ -e Makefile.PL ]; then
+              perl Makefile.PL
+            fi
+            perl -pi -e 's<CONFIGDEP =.*><CONFIGDEP =>' Makefile
+            make &&
+              make install ||
+              echo "Could not build $cpanm_module -- this is probably fatal"
+          ); done
+        )
+      fi
+    fi
     perl_libs=''
   fi
 }
