@@ -1525,6 +1525,8 @@ install_tools() {
     fi
   fi
   if [ -n "$perl_libs" ]; then
+  (
+    set -x
     cpanm_log=$(mktemp)
     (
       echo "$perl_libs" |
@@ -1568,6 +1570,7 @@ install_tools() {
         )
       fi
     fi
+  )
     perl_libs=''
   fi
 }
