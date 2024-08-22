@@ -1528,6 +1528,9 @@ install_tools() {
   (
     set -x
     cpanm_log=$(mktemp)
+    if [ -n "$TEMP" ] && [ -n "$temp" ] && [ "$TEMP" != "$temp" ]; then
+      TEMP="$temp"
+    fi
     (
       echo "$perl_libs" |
       xargs perl "$(command -v cpanm)" --verbose --notest 2>&1
