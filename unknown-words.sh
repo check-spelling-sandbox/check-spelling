@@ -1634,7 +1634,7 @@ check_perl_libraries() {
   if to_boolean "$INPUT_USE_SARIF"; then
     add_perl_lib Hash::Merge libhash-merge-perl
   fi
-  if need_hunspell; then
+  if need_hunspell && [ "$OS" != "Windows_NT" ]; then
     add_app hunspell
     add_perl_lib Text::Hunspell libtext-hunspell-perl
   fi
