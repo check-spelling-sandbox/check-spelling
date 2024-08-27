@@ -139,7 +139,14 @@ jobs:
           echo
           echo '```'
         ) >> "$GITHUB_STEP_SUMMARY"
-        perl `command -v cover` -test 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+        cover=$(command -v cover)
+        (
+          if [ -n "$cover" ]; then
+            perl "$cover" -test 2>&1
+          else
+            echo '`cover` not found'
+          fi
+        ) | tee -a "$GITHUB_STEP_SUMMARY"
         (
           echo '```'
           echo '</details>'
