@@ -122,6 +122,8 @@ jobs:
           fi
           wait
         ) > /tmp/prework || (cat /tmp/prework && false)
+        COVER_BIN=$(command -v cover || true)
+        echo "COVER_BIN=$COVER_BIN" >> "$GITHUB_ENV"
         ./Build.PL
         ./Build build
         (
@@ -139,10 +141,9 @@ jobs:
           echo
           echo '```'
         ) >> "$GITHUB_STEP_SUMMARY"
-        cover=$(command -v cover)
         (
-          if [ -n "$cover" ]; then
-            perl "$cover" -test 2>&1
+          if [ -n "$COVER_BIN" ]; then
+            perl "$COVER_BIN" -test 2>&1
           else
             echo '`cover` not found'
           fi
@@ -158,15 +159,14 @@ jobs:
       shell: bash
       run: |
         set -x
-        cover=$(command -v cover)
-        if [ -z "$cover" ]; then
+        if [ -z "$COVER_BIN" ]; then
           echo "# Cover binary not available" >> "$GITHUB_STEP_SUMMARY"
         else
           shasum=$(which shasum)
           if [ -n "$shasum" ]; then
-            perl "$cover" -ignore "$shasum" -report html
+            perl "$COVER_BIN" -ignore "$shasum" -report html
           else
-            perl "$cover" -report html
+            perl "$COVER_BIN" -report html
           fi
           if [ -e cover_db/coverage.html ]; then
             (
