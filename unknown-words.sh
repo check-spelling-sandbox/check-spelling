@@ -1584,7 +1584,7 @@ install_tools() {
               cd "$cpanm_module"
               if [ ! -e Makefile ] && [ -e Makefile.PL ]; then
                 makefile_pl_log=$(mktemp)
-                perl Makefile.PL |
+                perl -I'inc' Makefile.PL |
                   tee "$makefile_pl_log" ||
                   true
                 perl -ne 'next unless m{you may need to install the (\S+) module}; print' "$makefile_pl_log" >> "$needed_perl_libs"
