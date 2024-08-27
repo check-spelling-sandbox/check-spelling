@@ -1528,6 +1528,8 @@ install_tools() {
   (
     set -x
     cpanm_log=$(mktemp)
+    mv "$cpanm_log" "$HOME"
+    cpanm_log="$HOME/$(basename "$cpanm_log")"
     if [ -n "$TEMP" ] && [ -n "$temp" ] && [ "$TEMP" != "$temp" ]; then
       TEMP="$temp"
     fi
@@ -1560,9 +1562,15 @@ install_tools() {
       else
         (
           cd "$cpanm_work"
-          for cpanm_module in $(
-            perl -ne 'next unless m{Building(?: and testing|) (\S+).*failed|Building (\S+) \.\.\. make: \*\*\* No rule to make target .*/Config\.pm|Bailing out the installation for (.*)\.}; print "$1$2$3\n"' "$cpanm_log"
-          ) $needed_perl_libs; do (
+          available_modules=$(
+            perl -ne 'next unless s{^name:\s+}{};s/-/::/g; print' */META.yml
+          )
+          cpanm_modules=$(
+            for cpanm_module in $available_modules; do
+              perl -M"$cpanm_module" -e 1 || echo "$cpanm_module"
+            done
+          )
+          for cpanm_module in $cpanm_modules $needed_perl_libs; do (
             if echo "$cpanm_module" | grep -q '::'; then
               cpanm_module_with_star=$(echo "$cpanm_module" | perl -pe 's/::/-/g;s<$><*/>')
               cpanm_module_expanded=$(eval echo "$cpanm_module_with_star")
@@ -1581,7 +1589,10 @@ install_tools() {
                   true
                 perl -ne 'next unless m{you may need to install the (\S+) module}; print' "$makefile_pl_log" >> "$needed_perl_libs"
               fi
-              perl -pi -e 's<CONFIGDEP =.*><CONFIGDEP =>' Makefile
+              perl -pi -e '
+                s<CONFIGDEP =.*><CONFIGDEP =>;
+                s<ABSPERL =.*><ABSPERL = /usr/bin/perl>;
+              ' Makefile
               make &&
                 make install ||
                 echo "Could not build $cpanm_module -- this is probably fatal"
