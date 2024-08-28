@@ -5,6 +5,7 @@ codeql
 CONFIGDEP
 cpanm
 cpanminus
+cygpath
 excludelist
 fchurn
 fixin
