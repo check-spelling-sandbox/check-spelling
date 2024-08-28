@@ -1,2 +1,12 @@
 #!/bin/sh
-stdbuf -i0 -o0 -e0 $THIS_ACTION_PATH/unknown-words.sh
+if [ -e /c/msys64/usr/bin/bash ]; then
+  set -x
+  mount
+  /c/msys64/usr/bin/bash -c 'mount'
+  PATH="/c/msys64/mingw64/bin:/c/msys64/usr/local/bin:/c/msys64/usr/bin:$PATH"
+  mount
+  /c/msys64/usr/bin/bash -c 'mount'
+  stdbuf -i0 -o0 -e0 /c/msys64/usr/bin/bash --noprofile --norc -eo pipefail $THIS_ACTION_PATH/unknown-words.sh
+else
+  stdbuf -i0 -o0 -e0 $THIS_ACTION_PATH/unknown-words.sh
+fi
