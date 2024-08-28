@@ -1594,6 +1594,7 @@ install_tools() {
                 perl -pi -e '
                   s<CONFIGDEP =.*><CONFIGDEP =>;
                   s<ABSPERL =.*><ABSPERL = /usr/bin/perl>;
+                  s<NOECHO =.*><NOECHO =>;
                 ' Makefile
                 grep -n . Makefile
                 make &&
