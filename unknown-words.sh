@@ -1593,6 +1593,7 @@ install_tools() {
                 s<CONFIGDEP =.*><CONFIGDEP =>;
                 s<ABSPERL =.*><ABSPERL = /usr/bin/perl>;
               ' Makefile
+              grep -n . Makefile
               make &&
                 make install ||
                 echo "Could not build $cpanm_module -- this is probably fatal"
