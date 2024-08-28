@@ -1575,11 +1575,10 @@ install_tools() {
           last;
         }
       ' "$cpanm_log" | head -1)
-      if [ ! -d "$cpanm_work" ]; then
-        echo "::error ::Could not recover from cpanm failures -- this is probably fatal"
-      else
-        (
-          cd "$cpanm_work"
+      (
+        if ! cd "$cpanm_work" ; then
+          echo "::error ::Could not recover from cpanm failures -- this is probably fatal"
+        else
           available_modules=$(
             perl -ne 'next unless s{^name:\s+}{};s/-/::/g; print' */META.yml
           )
@@ -1627,8 +1626,8 @@ install_tools() {
               fi
             fi
           ); done
-        )
-      fi
+        fi
+      )
     fi
     sleep 2
     done
