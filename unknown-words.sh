@@ -1529,10 +1529,13 @@ install_tools() {
     set -x
     cygpath=$(command -v cygpath 2>/dev/null || true)
     if [ -n "$cygpath" ]; then
-      if "$cygpath" -w $(which perl) | grep -q Git &&
+      current_perl=$(command -v perl 2>/dev/null || true)
+      if "$cygpath" -w "$current_perl" | grep -q Git &&
         [ -e /c/msys64/usr/bin/perl ]; then
-          echo 'Favoring msys over Git'
+          echo 'Favoring msys perl over Git perl'
+          mv "$current_perl" "$current_perl.0"
           PATH="/c/msys64/usr/bin:$PATH"
+          hash -r
         fi
     fi
 
