@@ -1527,6 +1527,15 @@ install_tools() {
   if [ -n "$perl_libs" ]; then
   (
     set -x
+    cygpath=$(command -v cygpath 2>/dev/null || true)
+    if [ -n "$cygpath" ]; then
+      if "$cygpath" -w $(which perl) | grep -q Git &&
+        [ -e /c/msys64/usr/bin/perl ]; then
+          echo 'Favoring msys over Git'
+          PATH="/c/msys64/usr/bin:$PATH"
+        fi
+    fi
+
     cpanm_log=$(mktemp)
     mv "$cpanm_log" "$HOME"
     cpanm_log="$HOME/$(basename "$cpanm_log")"
@@ -1541,10 +1550,6 @@ install_tools() {
       tee "$cpanm_log" ||
       true
 
-    cygpath=$(command -v cygpath 2>/dev/null || true)
-    if [ -n "$cygpath" ]; then
-      "$cygpath" -w $(which perl)
-    fi
     interesting=$(find $(perl -e 'print qq(@INC)') -name ExtUtils 2>/dev/null || true)
     if [ -d "$interesting" ]; then
       ls "$interesting"
