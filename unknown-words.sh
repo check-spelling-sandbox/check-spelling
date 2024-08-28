@@ -1589,14 +1589,20 @@ install_tools() {
                   true
                 perl -ne 'next unless m{you may need to install the (\S+) module}; print' "$makefile_pl_log" >> "$needed_perl_libs"
               fi
-              perl -pi -e '
-                s<CONFIGDEP =.*><CONFIGDEP =>;
-                s<ABSPERL =.*><ABSPERL = /usr/bin/perl>;
-              ' Makefile
-              grep -n . Makefile
-              make &&
-                make install ||
+              ok=
+              if [ -f Makefile ]; then
+                perl -pi -e '
+                  s<CONFIGDEP =.*><CONFIGDEP =>;
+                  s<ABSPERL =.*><ABSPERL = /usr/bin/perl>;
+                ' Makefile
+                grep -n . Makefile
+                make &&
+                  make install &&
+                  ok=1
+              fi
+              if [ -z "$ok" ]; then
                 echo "Could not build $cpanm_module -- this is probably fatal"
+              fi
             fi
           ); done
         )
