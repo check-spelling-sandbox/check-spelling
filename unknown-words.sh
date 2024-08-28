@@ -1542,7 +1542,7 @@ install_tools() {
       true
 
     needed_perl_libs=$(mktemp)
-    for attempt in $(seq 5); do
+    for attempt in $(seq 3); do
     echo "attempt: $attempt"
     for perl_lib_requested in $perl_libs; do
       perl "-M$perl_lib_requested" -e1 2>/dev/null || echo "$perl_lib_requested" >> "$needed_perl_libs"
