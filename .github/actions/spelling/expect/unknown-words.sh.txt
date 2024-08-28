@@ -1,10 +1,13 @@
+ABSPERL
 apps
+blib
 codeql
 CONFIGDEP
 cpanm
 cpanminus
 excludelist
 fchurn
+fixin
 githubcli
 gpg
 gsutil
