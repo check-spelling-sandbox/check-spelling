@@ -1527,6 +1527,7 @@ install_tools() {
   if [ -n "$perl_libs" ]; then
   (
     set -x
+    mount
     cygpath=$(command -v cygpath 2>/dev/null || true)
     if [ -n "$cygpath" ]; then
       current_perl=$(command -v perl 2>/dev/null || true)
