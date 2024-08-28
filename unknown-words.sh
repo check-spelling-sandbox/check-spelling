@@ -1595,6 +1595,8 @@ install_tools() {
                   s<CONFIGDEP =.*><CONFIGDEP =>;
                   s<ABSPERL =.*><ABSPERL = /usr/bin/perl>;
                   s<NOECHO =.*><NOECHO =>;
+                  if (m<pm_to_blib\(>) { s<'"'"'(.*)'"'"' --><=$1=>; s<'"'\\\\''><'>g"';s<=><">g; };
+                  if (m/MY->fixin/) { s/'"'"'/"/g; }
                 ' Makefile
                 grep -n . Makefile
                 make &&
