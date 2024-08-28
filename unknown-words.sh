@@ -1541,6 +1541,14 @@ install_tools() {
       tee "$cpanm_log" ||
       true
 
+    cygpath=$(command -v cygpath 2>/dev/null || true)
+    if [ -n "$cygpath" ]; then
+      "$cygpath" -w $(which perl)
+    fi
+    interesting=$(find $(perl -e 'print qq(@INC)') -name ExtUtils 2>/dev/null || true)
+    if [ -d "$interesting" ]; then
+      ls "$interesting"
+    fi
     needed_perl_libs=$(mktemp)
     for attempt in $(seq 3); do
     echo "attempt: $attempt"
