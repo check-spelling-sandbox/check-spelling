@@ -1553,6 +1553,9 @@ install_tools() {
       ls "$interesting"
     fi
     needed_perl_libs=$(mktemp)
+    mkdir_shim=$(mktemp -d)
+    cp "$spellchecker/mkdir" "$mkdir_shim"
+    PATH="$mkdir_shim:$PATH"
     for attempt in $(seq 3); do
     echo "attempt: $attempt"
     for perl_lib_requested in $perl_libs; do
