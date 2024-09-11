@@ -1524,9 +1524,11 @@ install_tools() {
       echo "missing $apps -- things will fail" >&2
     fi
   fi
+  broken_log=$(mktemp)
   if [ -n "$perl_libs" ]; then
   (
     set -x
+    echo "$broken_log"
     mount
     cygpath=$(command -v cygpath 2>/dev/null || true)
     if [ -n "$cygpath" ]; then
@@ -1548,6 +1550,7 @@ install_tools() {
       tee "$cpanm_log" ||
       true
 
+    echo "$broken_log"
     interesting=$(find $(perl -e 'print qq(@INC)') -name ExtUtils 2>/dev/null || true)
     if [ -d "$interesting" ]; then
       ls "$interesting"
@@ -1628,7 +1631,7 @@ install_tools() {
     fi
     sleep 2
     done
-  )
+  ) 2>&1 | tee "$broken_log"
     perl_libs=''
   fi
 }
