@@ -1642,6 +1642,7 @@ install_tools() {
     done
   ) 2>&1 | tee "$broken_log"
     perl_libs=''
+    set -x
   fi
 }
 
