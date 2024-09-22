@@ -251,6 +251,17 @@ load_env() {
   . "$input_variables"
 }
 
+if command -v cygpath 2>/dev/null; then
+  cygpath_helper() {
+    cygpath.exe -w "$1" |
+    perl -pe 's#\\#\\\\#g'
+  }
+else
+  cygpath_helper() {
+    echo "$1"
+  }
+fi
+
 wrap_in_json() {
   echo '{}' | jq -r --arg arg "$2" ".$1="'$arg'
 }
@@ -1107,7 +1118,7 @@ define_variables() {
       )
     fi
   else
-    data_dir="$(mktemp -d)"
+    data_dir="$(cygpath_helper "$(mktemp -d)")"
   fi
   bucket="${INPUT_BUCKET:-"$bucket"}"
   project="${INPUT_PROJECT:-"$project"}"
@@ -1918,7 +1929,7 @@ set_up_reporter() {
     fi
   fi
   if ! to_boolean "$INPUT_USE_SARIF"; then
-    echo "::add-matcher::$spellchecker/reporter.json"
+    MSYS_NO_PATHCONV=1 echo "::add-matcher::$(cygpath_helper "$spellchecker/reporter.json")"
   fi
 }
 
@@ -3596,7 +3607,7 @@ compare_new_output() {
     sorted_run_output=$(mktemp)
     cat "$run_output" | sort_unique > "$sorted_run_output"
 
-    diff -w -U0 "$expect_path" "$sorted_run_output" |
+    diff -w -U0 "$(cygpath_helper "$expect_path")" "$(cygpath_helper "$sorted_run_output")" |
       grep_v_spellchecker > "$diff_output"
   end_group
 }
