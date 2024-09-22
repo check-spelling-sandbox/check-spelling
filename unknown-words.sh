@@ -3606,7 +3606,7 @@ compare_new_output() {
     cat "$run_output" | sort_unique > "$sorted_run_output"
 
     diff -w -U0 "$(cygpath_helper "$expect_path")" "$(cygpath_helper "$sorted_run_output")" |
-      grep_v_spellchecker > "$diff_output"
+      grep_v_spellchecker > "$diff_output" || true
   end_group
 }
 
