@@ -1640,6 +1640,7 @@ install_tools() {
           ); done
         fi
       )
+      rm "$needed_perl_libs"
     fi
     sleep 2
     done
