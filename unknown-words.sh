@@ -1538,10 +1538,7 @@ install_tools() {
   broken_log=$(mktemp)
   if [ -n "$perl_libs" ]; then
   (
-    set -x
     echo "$broken_log"
-    mount
-    env
     unset LD_PRELOAD
     cygpath=$(command -v cygpath 2>/dev/null || true)
     if [ -n "$cygpath" ]; then
@@ -1628,7 +1625,6 @@ install_tools() {
                   if (m<pm_to_blib\(>) { s<'"'"'(.*)'"'"' --><=$1=>; s<'"'\\\\''><'>g"';s<=><">g; };
                   if (m/MY->fixin/) { s/'"'"'/"/g; }
                 ' Makefile
-                grep -n . Makefile
                 make &&
                   make install &&
                   ok=1
