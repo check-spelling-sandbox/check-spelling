@@ -1589,7 +1589,7 @@ install_tools() {
               perl -M"$cpanm_module" -e 1 || echo "$cpanm_module"
             done
           )
-          for cpanm_module in $cpanm_modules $needed_perl_libs; do (
+          for cpanm_module in $(echo $cpanm_modules $(cat $needed_perl_libs) | xargs -n1 | sort -u); do (
             cpanm_module_with_star=$(echo "$cpanm_module" | perl -pe 's/::/-/g;s<$><*/>')
             cpanm_module_expanded=$(eval echo "$cpanm_module_with_star")
             if [ -d "$cpanm_module_expanded" ]; then
