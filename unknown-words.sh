@@ -1530,6 +1530,8 @@ install_tools() {
     set -x
     echo "$broken_log"
     mount
+    env
+    unset LD_PRELOAD
     cygpath=$(command -v cygpath 2>/dev/null || true)
     if [ -n "$cygpath" ]; then
       current_perl=$(command -v perl 2>/dev/null || true)
