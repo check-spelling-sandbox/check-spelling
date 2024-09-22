@@ -1590,15 +1590,14 @@ install_tools() {
             done
           )
           for cpanm_module in $cpanm_modules $needed_perl_libs; do (
-            if echo "$cpanm_module" | grep -q '::'; then
-              cpanm_module_with_star=$(echo "$cpanm_module" | perl -pe 's/::/-/g;s<$><*/>')
-              cpanm_module_expanded=$(eval echo "$cpanm_module_with_star")
-              if [ -d "$cpanm_module_expanded" ]; then
-                cpanm_module="$cpanm_module_expanded"
-              else
-                perl "$cpanm_command" --verbose --notest "$cpanm_module" || true
-              fi
+            cpanm_module_with_star=$(echo "$cpanm_module" | perl -pe 's/::/-/g;s<$><*/>')
+            cpanm_module_expanded=$(eval echo "$cpanm_module_with_star")
+            if [ -d "$cpanm_module_expanded" ]; then
+              cpanm_module="$cpanm_module_expanded"
+            else
+              perl "$cpanm_command" --verbose --notest "$cpanm_module" || true
             fi
+
             if [ -d "$cpanm_module" ]; then
               cd "$cpanm_module"
               if [ ! -e Makefile ] && [ -e Makefile.PL ]; then
