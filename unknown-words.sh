@@ -1598,7 +1598,7 @@ install_tools() {
           )
           cpanm_modules=$(
             for cpanm_module in $available_modules; do
-              perl -M"$cpanm_module" -e 1 || echo "$cpanm_module"
+              perl -M"$cpanm_module" -e 1 2>/dev/null || echo "$cpanm_module"
             done
           )
           for cpanm_module in $(echo $cpanm_modules $(cat $needed_perl_libs) | xargs -n1 | sort -u); do (
