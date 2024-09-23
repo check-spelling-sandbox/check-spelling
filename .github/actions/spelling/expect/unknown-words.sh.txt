@@ -17,8 +17,6 @@ maxdepth
 mindepth
 msys
 nektos
-noprofile
-norc
 noreply
 notest
 nproc
