@@ -1633,7 +1633,10 @@ install_tools() {
                   s<ABSPERL =.*><ABSPERL = /usr/bin/perl>;
                   s<NOECHO =.*><NOECHO =>;
                   s<MKPATH =.*><MKPATH = mkdir -p -->;
-                  if (m<pm_to_blib\(>) { s<'"'"'(.*)'"'"' --><=$1=>; s<'"'\\\\''><'>g"';s<=><">g; };
+                  s{'"'\\\\''(.*?)'\\\\''"'}{q<$1>}g;
+                  if (m<pm_to_blib\(>) {
+                    s<'"'"'(.*)'"'"' --><=$1=>; s<'"'\\\\''><'>g"';s<=><">g;
+                  };
                   if (m/MY->fixin/) { s/'"'"'/"/g; }
                 ' Makefile
                 make &&
