@@ -1539,7 +1539,10 @@ install_tools() {
   broken_log=$(mktemp)
   if [ -n "$perl_libs" ]; then
   (
+    set -x
     echo "$broken_log"
+    mount
+    env
     unset LD_PRELOAD
     cygpath=$(command -v cygpath 2>/dev/null || true)
     if [ -n "$cygpath" ]; then
