@@ -1548,6 +1548,13 @@ install_tools() {
     if [ -n "$cygpath" ]; then
       current_perl=$(command -v perl 2>/dev/null || true)
       "$cygpath" -w "$current_perl" | grep Git || true
+      view_bin=$(cygpath -w /bin)
+      view_tmp=$(cygpath -w /tmp)
+      view_usr=$(cygpath -w /usr)
+      view_usr_bin=$(cygpath -w /usr/bin)
+      view_usr_lib=$(cygpath -w /usr/lib)
+      view_usr_share=$(cygpath -w /usr/share)
+      perl -V
     fi
 
     cpanm_log=$(mktemp)
