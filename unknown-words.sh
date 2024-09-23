@@ -1628,17 +1628,7 @@ install_tools() {
               fi
               ok=
               if [ -f Makefile ]; then
-                perl -pi -e '
-                  s<CONFIGDEP =.*><CONFIGDEP =>;
-                  s<ABSPERL =.*><ABSPERL = /usr/bin/perl>;
-                  s<NOECHO =.*><NOECHO =>;
-                  s<MKPATH =.*><MKPATH = mkdir -p -->;
-                  s{'"'\\\\''(.*?)'\\\\''"'}{q<$1>}g;
-                  if (m<pm_to_blib\(>) {
-                    s<'"'"'(.*)'"'"' --><=$1=>; s<'"'\\\\''><'>g"';s<=><">g;
-                  };
-                  if (m/MY->fixin/) { s/'"'"'/"/g; }
-                ' Makefile
+                "$spellchecker/fix-cpan-makefile.pl" Makefile
                 make &&
                   make install &&
                   ok=1
