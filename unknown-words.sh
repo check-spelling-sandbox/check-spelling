@@ -1590,7 +1590,7 @@ install_tools() {
         }
       ' "$cpanm_log" | head -1)
       (
-        if ! cd "$cpanm_work" ; then
+        if ! cd "$(cygpath_helper "$cpanm_work")"; then
           echo "::error ::Could not recover from cpanm failures -- this is probably fatal"
         else
           available_modules=$(
