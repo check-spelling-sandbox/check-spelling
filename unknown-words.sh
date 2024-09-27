@@ -12,7 +12,6 @@ export spellchecker="${spellchecker:-$THIS_ACTION_PATH}"
 
 basic_setup() {
   if [ -z "$GITHUB_ENV" ]; then
-    env >&2
     export GITHUB_EVENT_NAME=push
     export GITHUB_EVENT_PATH=$(mktemp)
     echo '{}' > "$GITHUB_EVENT_PATH"
