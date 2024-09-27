@@ -1836,8 +1836,7 @@ get_extra_dictionary() {
   if { [ -z "$response_code" ] || [ "$response_code" -ge 400 ] || [ "$response_code" -eq 000 ] ; } 2> /dev/null; then
     echo "::error ::Failed to retrieve $extra_dictionary_url -- HTTP $response_code for $url ($dictionary_class-dictionary-not-found)" >> "$early_warnings"
     (
-      echo "Failed to retrieve $extra_dictionary_url ($url)"
-      cat "$response_headers"
+      echo "Failed to retrieve $extra_dictionary_url ($url). Headers $(jq -c -n -R '[inputs]' "$response_headers")"
     ) >&2
     rm -f "$dictionaries_canary"
     return
