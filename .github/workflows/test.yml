@@ -114,7 +114,13 @@ jobs:
           )
           [ -z "$cpan_modules" ] || command -v cpanm >/dev/null 2>/dev/null || curl -s -S -L https://cpanmin.us | perl - $PERL_SUDO_FLAG App::cpanminus
           if [ -n "$cpan_modules" ]; then
-            if ! perl `command -v cpanm` -S --notest $cpan_modules; then
+            spellchecker="$(pwd)" perl_libs="$cpan_modules" ./install-via-cpan.sh
+            cpan_modules=$(
+              for module in $required_perl_modules; do
+                perl -e "use $module; 1;" > /dev/null 2>/dev/null || echo $module
+              done | xargs
+            )
+            if [ -n "$cpan_modules" ]; then
               find $HOME/.cpanm/work
               find $HOME/.cpanm/work -name build.log |
                 xargs -n1 cat
