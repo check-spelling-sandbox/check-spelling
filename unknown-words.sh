@@ -28,6 +28,10 @@ basic_setup() {
   fi
 
   . "$spellchecker/common.sh"
+
+  if [ -e /c/msys64/usr/bin/bash ]; then
+    PATH="/c/msys64/mingw64/bin:/c/msys64/usr/local/bin:/c/msys64/usr/bin:$PATH"
+  fi
 }
 
 dispatcher() {

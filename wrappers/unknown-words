@@ -1,6 +1,6 @@
 #!/bin/sh
 if [ -e /c/msys64/usr/bin/bash ]; then
-  PATH="/c/msys64/mingw64/bin:/c/msys64/usr/local/bin:/c/msys64/usr/bin:$PATH"
+  # PATH="/c/msys64/mingw64/bin:/c/msys64/usr/local/bin:/c/msys64/usr/bin:$PATH"
   $THIS_ACTION_PATH/unknown-words.sh
 else
   stdbuf -i0 -o0 -e0 $THIS_ACTION_PATH/unknown-words.sh
