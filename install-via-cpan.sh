@@ -54,9 +54,15 @@ cp "$spellchecker/mkdir" "$mkdir_shim"
 PATH="$mkdir_shim:$PATH"
 for attempt in $(seq 3); do
 echo "attempt: $attempt"
-for perl_lib_requested in $perl_libs; do
-  perl "-M$perl_lib_requested" -e1 2>/dev/null || echo "$perl_lib_requested" >> "$needed_perl_libs"
-done
+
+select_perl_libs() {
+  rm -f "$needed_perl_libs"
+  for perl_lib_requested in $perl_libs; do
+    perl "-M$perl_lib_requested" -e1 2>/dev/null || echo "$perl_lib_requested" >> "$needed_perl_libs"
+  done
+}
+select_perl_libs
+
 if [ -s "$needed_perl_libs" ]; then
   cpanm_work=$(perl -ne '
     if (m{^Work directory is (.*)}) {
@@ -112,7 +118,7 @@ if [ -s "$needed_perl_libs" ]; then
       ); done
     fi
   )
-  rm "$needed_perl_libs"
+  select_perl_libs
 fi
 sleep 2
 done
