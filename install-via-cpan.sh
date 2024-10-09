@@ -39,7 +39,7 @@ cpanm_command=$(command -v cpanm)
 canary=$(mktemp)
 (
   echo "$perl_libs" |
-  xargs perl "$cpanm_command" --verbose --notest 2>&1 &&
+  xargs perl "$cpanm_command" --verbose --notest --no-man-pages 2>&1 &&
   rm "$canary"
 ) |
   tee "$cpanm_log" ||
@@ -98,7 +98,7 @@ if [ -s "$needed_perl_libs" ]; then
         if [ -d "$cpanm_module_expanded" ]; then
           cpanm_module="$cpanm_module_expanded"
         else
-          perl "$cpanm_command" --verbose --notest "$cpanm_module" || true
+          perl "$cpanm_command" --verbose --notest --no-man-pages "$cpanm_module" || true
         fi
 
         if [ -d "$cpanm_module" ]; then
