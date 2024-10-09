@@ -36,12 +36,18 @@ if [ -n "$TEMP" ] && [ -n "$temp" ] && [ "$TEMP" != "$temp" ]; then
   TEMP="$temp"
 fi
 cpanm_command=$(command -v cpanm)
+canary=$(mktemp)
 (
   echo "$perl_libs" |
-  xargs perl "$cpanm_command" --verbose --notest 2>&1
+  xargs perl "$cpanm_command" --verbose --notest 2>&1 &&
+  rm "$canary"
 ) |
   tee "$cpanm_log" ||
   true
+if [ ! -e "$canary" ]; then
+  exit 0
+fi
+rm -f "$canary"
 
 echo "$broken_log"
 interesting=$(find $(perl -e 'print qq(@INC)') -name ExtUtils 2>/dev/null || true)
