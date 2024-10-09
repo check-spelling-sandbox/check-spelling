@@ -116,6 +116,11 @@ if [ -s "$needed_perl_libs" ]; then
             make &&
               make install &&
               ok=1
+          elif [ -f Build.PL ]; then
+            perl ./Build.PL &&
+              ./Build &&
+              ./Build install
+            ok = 1
           fi
           if [ -z "$ok" ]; then
             echo "Could not build $cpanm_module -- this is probably fatal"
