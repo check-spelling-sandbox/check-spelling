@@ -117,7 +117,12 @@ jobs:
             spellchecker="$(pwd)" perl_libs="$cpan_modules" ./install-via-cpan.sh
             cpan_modules=$(
               for module in $required_perl_modules; do
-                perl -e "use $module; 1;" > /dev/null 2>/dev/null || echo $module
+                if perl -e "use $module; 1;" >&2; then
+                  echo ''
+                else
+                  echo $? >&2
+                  echo $module
+                fi
               done | xargs
             )
             if [ -n "$cpan_modules" ]; then
