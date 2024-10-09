@@ -64,11 +64,28 @@ jobs:
       run: |
         PATH="$PATH":~/go/bin
         mkdir -p ~/go/bin
+        perl_env=$(mktemp)
+        export_perl_env=$(mktemp)
+        build_perl_env() {
+          cat > "$perl_env" <<EOF
+        PATH=~/perl5/bin"${PATH+:}${PATH}"
+        PERL5LIB=~/perl5/lib/perl5"${PERL5LIB+:}${PERL5LIB}"
+        PERL_LOCAL_LIB_ROOT=~/perl5"${PERL_LOCAL_LIB_ROOT+:}${PERL_LOCAL_LIB_ROOT}"
+        PERL_MB_OPT='--install_base "'~/perl5'"'
+        PERL_MM_OPT='INSTALL_BASE='~/perl5
+        EOF
+          cat > "$export_perl_env" <<EOF
+        export PERL5LIB
+        export PERL_LOCAL_LIB_ROOT
+        export PERL_MB_OPT
+        export PERL_MM_OPT
+        EOF
+        }
         (
           set -x
-          PATH=$PATH:~/go/bin
+          command -v apt-get >/dev/null 2>/dev/null && HAS_APT=1 || HAS_APT=
           if ! command -v cover >/dev/null 2>/dev/null; then
-            if command -v apt-get >/dev/null 2>/dev/null; then
+            if [ -n "$HAS_APT" ]; then
               APT_PACKAGES="libdevel-cover-perl $APT_PACKAGES"
             else
               required_perl_modules="$required_perl_modules Devel::Cover"
@@ -102,29 +119,59 @@ jobs:
               echo 'Could not install jd' >&2
             fi
           ) &
-          if command -v apt-get >/dev/null 2>/dev/null && ! command -v cpanm >/dev/null 2>/dev/null; then
-            APT_PACKAGES="cpanminus $APT_PACKAGES"
-          fi
-          [ -z "$APT_PACKAGES" ] ||
-          (
-            if ! $SUDO apt-get install -y $APT_PACKAGES; then
-              $SUDO apt-get update &&
-              $SUDO apt-get install -y $APT_PACKAGES
+          if [ -n "$HAS_APT" ] && [ -n "$cpan_modules" ]; then
+            if ! find /var/lib/apt/lists/ -mindepth 1 -type f |grep -q .; then
+              apt-get update -q
             fi
-          )
-          [ -z "$cpan_modules" ] || command -v cpanm >/dev/null 2>/dev/null || curl -s -S -L https://cpanmin.us | perl - $PERL_SUDO_FLAG App::cpanminus
-          if [ -n "$cpan_modules" ]; then
-            spellchecker="$(pwd)" perl_libs="$cpan_modules" ./install-via-cpan.sh
-            cpan_modules=$(
-              for module in $required_perl_modules; do
-                if perl -e "use $module; 1;" >&2; then
-                  echo ''
-                else
-                  echo $? >&2
-                  echo $module
-                fi
-              done | xargs
+            debian_perl_packages=$(
+              for module in $cpan_modules; do
+                echo $module |
+                perl -pe 'tr/A-Z/a-z/;s/::/-/g;s/$/-perl/;s/^/lib/' |
+                xargs -n1 apt-cache search
+              done |
+              perl -pe 's/ - .*//'
             )
+            if [ -n "$debian_perl_packages" ]; then
+              APT_PACKAGES="$debian_perl_packages $APT_PACKAGES"
+            fi
+          fi
+          run_apt_install() {
+            if [ -n "$APT_PACKAGES" ]; then
+              if ! $SUDO apt-get install -y $APT_PACKAGES; then
+                $SUDO apt-get update &&
+                $SUDO apt-get install -y $APT_PACKAGES
+              fi
+              APT_PACKAGES=''
+            fi
+          }
+          run_apt_install
+          get_cpan_modules() {
+            for module in $required_perl_modules; do
+              if ! perl -e "use $module; 1;" >&2; then
+                echo $? >&2
+                echo $module
+              fi
+            done
+          }
+          cpan_modules="$(get_cpan_modules)"
+          if [ -n "$cpan_modules" ]; then
+            has_cpanm() {
+              command -v cpanm >/dev/null 2>/dev/null
+            }
+            if ! has_cpanm; then
+              APT_PACKAGES="cpanminus $APT_PACKAGES"
+              run_apt_install
+            fi
+            if ! has_cpanm; then
+              curl -s -S -L https://cpanmin.us |
+                perl - $PERL_SUDO_FLAG App::cpanminus
+            fi
+            build_perl_env
+            . "$perl_env"
+            . "$export_perl_env"
+
+            spellchecker="$(pwd)" perl_libs="$cpan_modules" ./install-via-cpan.sh
+            cpan_modules=$(get_cpan_modules)
             if [ -n "$cpan_modules" ]; then
               find $HOME/.cpanm/work
               find $HOME/.cpanm/work -name build.log |
@@ -135,6 +182,11 @@ jobs:
         ) > /tmp/prework || (cat /tmp/prework && false)
         COVER_BIN=$(command -v cover || true)
         echo "COVER_BIN=$COVER_BIN" >> "$GITHUB_ENV"
+        if [ -s "$perl_env" ]; then
+          . "$perl_env"
+          . "$export_perl_env"
+          cat "$perl_env" >> "$GITHUB_ENV"
+        fi
         ./Build.PL
         ./Build build
         (
