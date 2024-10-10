@@ -64,6 +64,8 @@ jobs:
       id: test
       shell: bash
       run: |
+        PATH="$PATH":~/go/bin
+        mkdir -p ~/go/bin
         (
           PATH=$PATH:~/go/bin
           cpan_modules=$(
@@ -73,17 +75,19 @@ jobs:
           )
           [ -z "$cpan_modules" ] || command -v cpanm >/dev/null 2>/dev/null || curl -s -S -L https://cpanmin.us | perl - --sudo App::cpanminus
           command -v jd && HAS_JD=1 || HAS_JD=
-          [ -n "$HAS_JD" ] || command -v go >/dev/null 2>/dev/null || GO_PACKAGE=" golang"
-          APT_PACKAGES="$GO_PACKAGE"
           [ -z "$APT_PACKAGES" ] ||
           (
-            APT_PACKAGES="$GO_PACKAGE"
             sudo apt-get install -y $APT_PACKAGES ||
             sudo apt-get update &&
             sudo apt-get install -y $APT_PACKAGES
           )
           [ -z "$cpan_modules" ] || perl `command -v cpanm` -S --notest $cpan_modules
-          [ -n "$HAS_JD" ] || go install 'github.com/josephburnett/jd@latest' || echo 'Could not install jd' >&2
+          if [ -z "$HAS_JD" ]; then
+            JD_BIN=~/go/bin/jd
+            gh release download -R josephburnett/jd -p "*$(go env GO"ARCH")-$(go env GO"OS")*" -O "$JD_BIN" &&
+            chmod +x "$JD_BIN" ||
+            echo 'Could not install jd' >&2
+          fi
         ) > /tmp/prework || (cat /tmp/prework && false)
         ./Build.PL
         ./Build build
