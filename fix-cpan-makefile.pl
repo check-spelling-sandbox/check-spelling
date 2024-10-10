@@ -1,5 +1,7 @@
 #!/usr/bin/env -S perl -pi.0
 s<CONFIGDEP =.*><CONFIGDEP =>;
+s<XSUBPPDEPS =.*><XSUBPPDEPS =>;
+s<: \Q$(PERL_HDRS)\E><:>;
 s<ABSPERL =.*><ABSPERL = /usr/bin/perl>;
 s<NOECHO =.*><NOECHO =>;
 s<MKPATH =.*><MKPATH = mkdir -p -->;
