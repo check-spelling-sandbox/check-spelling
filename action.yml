@@ -615,7 +615,7 @@ runs:
       continue-on-error: true
       id: upload-sarif
       if: (success() || (failure() && env.MERGE_FAILED != '1')) && env.UPLOAD_SARIF_LIMITED != '' && !env.replace_v3_github_codeql_action
-      uses: github/codeql-action/upload-sarif@v3
+      uses: check-spelling-sandbox/codeql-action-thin@main
       with:
         wait-for-processing: ${{ inputs.wait-for-sarif-processing != '' && inputs.wait-for-sarif-processing || 'false' }}
         sarif_file: ${{ env.UPLOAD_SARIF_LIMITED }}
