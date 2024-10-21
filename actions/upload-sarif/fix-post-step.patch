@@ -1,0 +1,68 @@
+From 602627410869d64f93a9ab25a6e0c3014395e80c Mon Sep 17 00:00:00 2001
+From: Chris Gavin <chris@chrisgavin.me>
+Date: Mon, 21 Oct 2024 10:37:48 +0100
+Subject: [PATCH 1/2] Persist inputs between the upload action and its post
+ step.
+
+---
+ lib/actions-util.js                 | 25 ++++++++++++++++++++++++-
+ lib/upload-sarif-action-post.js     |  2 ++
+ lib/upload-sarif-action.js          |  1 +
+ 9 files changed, 60 insertions(+), 4 deletions(-)
+
+diff --git a/lib/actions-util.js b/lib/actions-util.js
+index dca5e83cd4..716b1346f4 100644
+--- a/lib/actions-util.js
++++ b/lib/actions-util.js
+@@ -25,3 +25,3 @@ var __importStar = (this && this.__importStar) || function (mod) {
+ Object.defineProperty(exports, "__esModule", { value: true });
+-exports.CommandInvocationError = exports.getFileType = exports.FileCmdNotFoundError = exports.determineBaseBranchHeadCommitOid = exports.getCommitOid = exports.getOptionalInput = exports.getRequiredInput = void 0;
++exports.restoreInputs = exports.persistInputs = exports.CommandInvocationError = exports.getFileType = exports.FileCmdNotFoundError = exports.determineBaseBranchHeadCommitOid = exports.getCommitOid = exports.getOptionalInput = exports.getRequiredInput = void 0;
+ exports.getTemporaryDirectory = getTemporaryDirectory;
+@@ -447,2 +447,25 @@ class CommandInvocationError extends Error {
+ exports.CommandInvocationError = CommandInvocationError;
++const persistedInputsKey = "persisted_inputs";
++/**
++ * Persists all inputs to the action as state that can be retrieved later in the post-action.
++ * This is need due to a runner bug that can cause inputs to be lost in the post-action.
++ * https://github.com/actions/runner/issues/3514
++ */
++const persistInputs = function () {
++    const inputEnvironmentVariables = Object.entries(process.env).filter(([name]) => name.startsWith("INPUT_"));
++    core.saveState(persistedInputsKey, JSON.stringify(inputEnvironmentVariables));
++};
++exports.persistInputs = persistInputs;
++/**
++ * Restores all inputs to the action from the persisted state.
++ */
++const restoreInputs = function () {
++    const persistedInputs = core.getState(persistedInputsKey);
++    if (persistedInputs) {
++        for (const [name, value] of JSON.parse(persistedInputs)) {
++            process.env[name] = value;
++        }
++    }
++};
++exports.restoreInputs = restoreInputs;
+ function ensureEndsInPeriod(text) {
+diff --git a/lib/upload-sarif-action-post.js b/lib/upload-sarif-action-post.js
+index c48b4e737f..6288c22fa7 100644
+--- a/lib/upload-sarif-action-post.js
++++ b/lib/upload-sarif-action-post.js
+@@ -31,2 +31,3 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ const core = __importStar(require("@actions/core"));
++const actionsUtil = __importStar(require("./actions-util"));
+ const actions_util_1 = require("./actions-util");
+@@ -40,3 +41,4 @@ const repository_1 = require("./repository");
+ async function runWrapper() {
+     try {
++        actionsUtil.restoreInputs();
+         const logger = (0, logging_1.getActionsLogger)();
+diff --git a/lib/upload-sarif-action.js b/lib/upload-sarif-action.js
+index adaff29ede..a1f2451245 100644
+--- a/lib/upload-sarif-action.js
++++ b/lib/upload-sarif-action.js
+@@ -51,2 +51,3 @@ async function run() {
+     (0, util_1.checkActionVersion)((0, actions_util_1.getActionVersion)(), gitHubVersion);
++    actionsUtil.persistInputs();
+     const repositoryNwo = (0, repository_1.parseRepositoryNwo)((0, util_1.getRequiredEnvParam)("GITHUB_REPOSITORY"));

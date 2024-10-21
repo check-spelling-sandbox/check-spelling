@@ -36,6 +36,22 @@ outputs:
 runs:
   using: "composite"
   steps:
+  - name: Patch upload-sarif
+    shell: bash
+    run: |
+      : Patch upload-sarif
+      action_yml="$GITHUB_ACTION_PATH/action.yml"
+      action_path="$(perl -ne 'next unless s#^\s*uses:\s*([^/]+/[^/@]+)[^@]*\@(.*)#$1/$2#; print' "$action_yml")"
+      patch_file="$(find "$GITHUB_ACTION_PATH" -name '*.patch' | head -1)"
+      file_to_patch="$(grep diff $patch_file |perl -ne 'next unless s<.* b/><>;print'|head -1)"
+      full_action_path=~/work/_actions/"$action_path"
+      if [ -e "$full_action_path/$file_to_patch" ] && ! grep -q saveState; then
+        if ! patch -s -d "$full_action_path" -p1 -i "$patch_file"; then
+          find "$full_action_path" -name '*.rej' -o -name '*.orig' -print0 |
+            xargs -0 -n1 grep -n . || true
+          echo '::warning ::Patch failed please check for an issue in https://github.com/check-spelling/check-spelling/issues'
+        fi
+      fi
   - name: Upload SARIF
     id: action
     continue-on-error: true
