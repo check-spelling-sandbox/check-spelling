@@ -113,6 +113,7 @@ jobs:
       id: spelling
       uses: ./
       with:
+        debug: 1
         suppress_push_for_open_pull_request: 1
         check_file_names: 1
         experimental_path: introspected
