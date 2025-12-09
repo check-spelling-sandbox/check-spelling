@@ -403,9 +403,11 @@ runs:
         ) >> "$GITHUB_ENV"
         ls -hal ..
         ls -hald ../check-spelling-actions || true
+        if [ $(realpath "$THIS_ACTION_PATH"/actions) != $(realpath ../check-spelling-actions) ]; then
         if ! ln -s "$THIS_ACTION_PATH"/actions ../check-spelling-actions; then
           mkdir -p ../check-spelling-actions
           cp -R "$THIS_ACTION_PATH"/actions/ ../check-spelling-actions/
+        fi
         fi
         echo "$THIS_ACTION_PATH/wrappers" >> "$GITHUB_PATH"
         echo "THIS_GITHUB_JOB_ID=$THIS_GITHUB_JOB_ID" >> "$GITHUB_ENV"
