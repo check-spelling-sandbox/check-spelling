@@ -393,6 +393,9 @@ runs:
       shell: bash
       run: |
         : Shim path and local actions
+        pwd
+        env
+        set -x
         THIS_ACTION_PATH=$(realpath "$GITHUB_ACTION_PATH")
         (
           echo "THIS_ACTION_PATH=$THIS_ACTION_PATH"
