@@ -401,6 +401,8 @@ runs:
           echo "THIS_ACTION_PATH=$THIS_ACTION_PATH"
           echo "spellchecker=$THIS_ACTION_PATH"
         ) >> "$GITHUB_ENV"
+        ls -hal ..
+        ls -hald ../check-spelling-actions || true
         if ! ln -s "$THIS_ACTION_PATH"/actions ../check-spelling-actions; then
           mkdir -p ../check-spelling-actions
           cp -R "$THIS_ACTION_PATH"/actions/ ../check-spelling-actions/
