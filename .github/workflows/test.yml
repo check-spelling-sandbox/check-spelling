@@ -200,6 +200,7 @@ jobs:
             next if $last_line eq $_;
             next if /\QCould not open file (no-such-file)\E/;
             next if /^Files=\d+, Tests=\d+,/;
+            next if /^(?:Reading database from |Devel::Cover: merging data)/;
             $last_line = $_;
             s/ \.+ ok/|✅/ || s/ \.+ /|/;
             s/^\s+(.*):\s*/... $1|/;
