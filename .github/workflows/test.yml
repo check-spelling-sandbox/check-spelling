@@ -189,9 +189,11 @@ jobs:
           echo '# Tests'
           echo 'test|result';
           echo '-|-';
-          perl -ne '
+          perl -e '
             $new_state = 0;
-            if (m<t/.*\.t \.+ \w*$|^---|^\s*Failed test:|^\s*Non-zero exit status:|\(Wstat>) {
+            my $no_such_file = "Could not open file (no-such-file)";
+            while (<>) {
+            if (m<t/.*\.t \.+ \w*$|^---|^\s*Failed test:|^\s*Non-zero exit status:|\([W]stat>) {
               $new_state = 1;
             }
             next unless ($new_state || $state);
@@ -199,7 +201,7 @@ jobs:
             $state = $new_state;
             next unless /\w/;
             next if $last_line eq $_;
-            next if /\QCould not open file (no-such-file)\E/;
+            next if /\Q$no_such_file\E/;
             next if /^Files=\d+, Tests=\d+,/;
             next if /^(?:Reading database from |Devel::Cover: merging data)/;
             $last_line = $_;
@@ -209,7 +211,8 @@ jobs:
             s/\s+(\([Ww]stat)/|❌ $1/ unless /\|/;
             s/All tests successful\./All tests|✅/;
             s/\.($)/|😳$1/ if / at .* line \d+\./ && !/\|/;
-            print' "$cover_output"
+            print
+            }' "$cover_output"
           echo
           echo '<details><summary>Details</summary>'
           echo
