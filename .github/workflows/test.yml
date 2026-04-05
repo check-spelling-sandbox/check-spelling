@@ -49,7 +49,7 @@ jobs:
           echo "perl-modules=$perl_modules"
         ) >> "$GITHUB_OUTPUT"
     - name: Dependencies
-      id: depedencies
+      id: dependencies
       shell: bash
       env:
         required_perl_modules: ${{ steps.perl-config.outputs.perl-modules }}
@@ -151,11 +151,11 @@ jobs:
         )
 
     - name: Install gh
-      if: steps.depedencies.outputs.gh-location
+      if: steps.dependencies.outputs.gh-location
       uses: ./actions/gh-program-downloader
       with:
         repository: cli/cli
-        destination: ${{ steps.depedencies.outputs.gh-location }}
+        destination: ${{ steps.dependencies.outputs.gh-location }}
         file-re: bin/
         trace: 1
       env:
